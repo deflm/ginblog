@@ -15,7 +15,7 @@ type User struct {
 	Role     int    `gorm:"type:int" json:"role" binding:"required"`
 }
 
-// 查询用户
+// CheckUser 查询用户
 func CheckUser(name string) int {
 	var user User
 	db.Select("id").Where("username = ?", name).First(&user)
@@ -25,7 +25,7 @@ func CheckUser(name string) int {
 	return errmsg.SUCCESS
 }
 
-// 创建用户
+// CreateUser 创建用户
 func CreateUser(user *User) int {
 	//user.Password = ScryptPw(user.Password)
 	err := db.Create(user).Error
@@ -35,7 +35,7 @@ func CreateUser(user *User) int {
 	return errmsg.SUCCESS
 }
 
-// 查询用户列表
+// GetUsers 查询用户列表
 func GetUsers(pageSize int, pageNum int) []User {
 	var users []User
 	err := db.Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&users).Error
@@ -45,7 +45,7 @@ func GetUsers(pageSize int, pageNum int) []User {
 	return users
 }
 
-// 编辑用户信息
+// EditUser 编辑用户信息
 func EditUser(id int, user *User) int {
 	m := map[string]interface{}{
 		"username": user.Username,
@@ -58,7 +58,7 @@ func EditUser(id int, user *User) int {
 	return errmsg.SUCCESS
 }
 
-// 删除用户
+// DeleteUser 删除用户
 func DeleteUser(id int) int {
 	var user User
 	err = db.Where("id = ?", id).Delete(&user).Error
