@@ -27,7 +27,7 @@ func CheckUser(name string) int {
 
 // 创建用户
 func CreateUser(user *User) int {
-	user.Password = ScryptPw(user.Password)
+	//user.Password = ScryptPw(user.Password)
 	err := db.Create(user).Error
 	if err != nil {
 		return errmsg.ERROR
@@ -43,6 +43,34 @@ func GetUsers(pageSize int, pageNum int) []User {
 		return nil
 	}
 	return users
+}
+
+// 编辑用户信息
+func EditUser(id int, user *User) int {
+	m := map[string]interface{}{
+		"username": user.Username,
+		"role":     user.Role,
+	}
+	err = db.Model(&user).Where("id = ?", id).Updates(m).Error
+	if err != nil {
+		return errmsg.ERROR
+	}
+	return errmsg.SUCCESS
+}
+
+// 删除用户
+func DeleteUser(id int) int {
+	var user User
+	err = db.Where("id = ?", id).Delete(&user).Error
+	if err != nil {
+		return errmsg.ERROR
+	}
+	return errmsg.SUCCESS
+}
+
+func (u *User) BeforeSave(*gorm.DB) error {
+	u.Password = ScryptPw(u.Password)
+	return nil
 }
 
 func ScryptPw(password string) string {
