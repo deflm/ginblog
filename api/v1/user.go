@@ -3,6 +3,7 @@ package v1
 import (
 	"ginblog/model"
 	"ginblog/utils/errmsg"
+	"ginblog/utils/validator"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -19,14 +20,22 @@ func UserExist(c *gin.Context) {
 func AddUser(c *gin.Context) {
 	var user model.User
 	_ = c.ShouldBindJSON(&user)
+	msg, code := validator.Validate(user)
+	if code != errmsg.SUCCESS {
+		c.JSON(http.StatusOK, gin.H{
+			"status": code,
+			"msg":    msg,
+		})
+		return
+	}
 	code = model.CheckUser(user.Username)
 	if code == errmsg.SUCCESS {
 		model.CreateUser(&user)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": code,
-		"data":   user,
-		"msg":    errmsg.GetErrMsg(code),
+		//"data":   user,
+		"msg": errmsg.GetErrMsg(code),
 	})
 }
 
@@ -39,12 +48,13 @@ func GetUsers(c *gin.Context) {
 	if pageNum == 0 {
 		pageNum = 1
 	}
-	data := model.GetUsers(pageSize, pageNum)
+	data, total := model.GetUsers(pageSize, pageNum)
 	code = errmsg.SUCCESS
 	c.JSON(http.StatusOK, gin.H{
 		"status": code,
 		"data":   data,
 		"msg":    errmsg.GetErrMsg(code),
+		"total":  total,
 	})
 }
 
