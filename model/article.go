@@ -13,7 +13,7 @@ type Article struct {
 	Cid      int      `gorm:"type:int; not null" json:"cid"`
 	Desc     string   `gorm:"type:varchar(200)" json:"desc"`
 	Content  string   `gorm:"type:longtext" json:"content"`
-	Img      string   `gorm:"type:varchar(100)" json:"img"`
+	Img      string   `gorm:"type:varchar(100)" json:"a.img"`
 }
 
 // CreateArt 新增文章
@@ -56,7 +56,7 @@ func GetArt(pageSize int, pageNum int) ([]Article, int, int64) {
 	var err error
 	var total int64
 
-	//err = db.Select("articles.id, title, img, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum - 1) * pageSize).Order("Created_At DESC").Joins("Category").Find(&articleList).Error
+	//err = db.Select("articles.id, title, a.img, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum - 1) * pageSize).Order("Created_At DESC").Joins("Category").Find(&articleList).Error
 	err = db.Preload("Category").Limit(pageSize).Offset((pageNum - 1) * pageSize).Find(&articleList).Error
 	// 单独计数
 	db.Model(&articleList).Count(&total)
@@ -72,7 +72,7 @@ func GetArt(pageSize int, pageNum int) ([]Article, int, int64) {
 func SearchArticle(title string, pageSize int, pageNum int) ([]Article, int, int64) {
 	var articleList []Article
 	var total int64
-	err = db.Select("article.id,title, img, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum-1)*pageSize).Order("Created_At DESC").Joins("Category").Where("title LIKE ?",
+	err = db.Select("article.id,title, a.img, created_at, updated_at, `desc`, comment_count, read_count, category.name").Limit(pageSize).Offset((pageNum-1)*pageSize).Order("Created_At DESC").Joins("Category").Where("title LIKE ?",
 		title+"%",
 	).Find(&articleList).Count(&total).Error
 	// 单独计数
@@ -92,7 +92,7 @@ func EditArt(id int, data *Article) int {
 	maps["cid"] = data.Cid
 	maps["desc"] = data.Desc
 	maps["content"] = data.Content
-	maps["img"] = data.Img
+	maps["a.img"] = data.Img
 
 	err = db.Model(&art).Where("id = ? ", id).Updates(&maps).Error
 	if err != nil {
